@@ -1,0 +1,16 @@
+syntax = 'proto3';
+
+package protobuf;
+
+service Chat {
+    rpc SendMessage(Message) returns (Response) {}
+}
+
+
+message Message {
+    string content = 1;
+}
+
+message Response {
+    bool received = 1;
+}
