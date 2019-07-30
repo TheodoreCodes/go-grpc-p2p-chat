@@ -3,29 +3,19 @@ package gui
 import (
 	"fmt"
 	"github.com/jroimartin/gocui"
+	"github.com/proh-gram-er/go-grpc-p2p-chat/chat"
 	"github.com/proh-gram-er/go-grpc-p2p-chat/events"
 	"log"
 )
 
-func updateConversation(e events.Event) {
+func refreshConversation(e events.Event) {
 	g.Update(func(g *gocui.Gui) error {
-		v, err := g.View("conversation")
-		if err != nil {
-			// @TODO handle error
-			return err
-		}
-
-		var msg string
-		if se, ok := e.(events.SentMessageEvent); ok {
-			msg = fmt.Sprintf("You: %s", se.Message)
-		} else if re, ok := e.(events.ReceiveMessageEvent); ok {
-			msg = fmt.Sprintf("Friend: %s", re.Message)
-		}
-		_, err = fmt.Fprintln(v, msg)
-
+		view, err := g.View("conversation")
 		if err != nil {
 			return err
 		}
+		view.Clear()
+		_, _ = fmt.Fprint(view, chat.GetActiveConversation())
 
 		return nil
 	})
@@ -81,9 +71,8 @@ func hideModal(e events.Event) {
 	}
 }
 
-func subscribeListeners() {
-	events.Subscribe(updateConversation, "message:sent")
-	events.Subscribe(updateConversation, "message:receive")
+func SubscribeListeners() {
+	events.Subscribe(refreshConversation, "conversation:refresh")
 
 	events.Subscribe(displayModal, "modal:display")
 	events.Subscribe(hideModal, "modal:hide")
